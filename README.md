@@ -82,6 +82,8 @@ Then try:
 
 **claude.ai / ChatGPT connectors** — both require a publicly reachable URL (deploy to Vercel or tunnel with `ngrok http 3000`) and currently favor OAuth for remote servers; see roadmap.
 
+**Vercel Eve** — [`examples/eve-agent`](examples/eve-agent) is a complete [Eve](https://vercel.com/eve) agent wired to the gateway via `defineMcpClientConnection`, with instructions that teach the discovery loop. One agent, 7 schemas in context, 116 tools in reach.
+
 ## MCP surface
 
 | Tool | Kind | What it does |

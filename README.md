@@ -41,9 +41,9 @@ The fleet tools (crm, billing, calendar, github, slack, analytics, inventory, su
 ## What's real
 
 - **Auth** — BetterAuth email/password sessions for the dashboard; per-user API keys (hashed at rest, shown once) gate every MCP request. Each key resolves to its owning user, and every RAG tool is scoped to that user's documents. No key, no tools: the gateway 401s.
-- **RAG** — paragraph-aware chunking (~1200 chars, 150 overlap) → embeddings → pgvector with HNSW cosine index. Search, list, fetch, and ingest are all exposed over both REST (dashboard) and MCP (agents).
+- **RAG** — paragraph-aware chunking (~1200 chars, 150 overlap) → embeddings → pgvector with HNSW cosine index. Search, list, fetch, and ingest are all exposed over both REST (dashboard) and MCP (agents). The dashboard search box runs the same per-user pipeline as `rag_search`, so you can see whether ingest worked before wiring a client.
 - **Zero-key demo mode** — without `OPENAI_API_KEY`, embeddings fall back to a deterministic hashed bag-of-words baseline (FNV-1a token hashing into 1536 dims, tf-weighted, L2-normalized). That's real lexical retrieval, not random vectors — the entire stack runs end-to-end with no external API keys. Set one env var to switch to `text-embedding-3-small`.
-- **Tests + retrieval eval** — `npm test` runs 30 unit tests (chunking, embedding determinism/normalization, registry search ranking, catalog composition, schema-validated dispatch) plus a golden-set retrieval eval that runs the real chunk→embed→rank pipeline in memory and fails the build if recall@1 or recall@3 regress — currently 78% / 100% on the zero-key lexical baseline. `npm run smoke` exercises the whole story against a running server: sign-up → API key → ingest → MCP initialize → auth rejection → `rag_search` relevance → fleet discovery → dispatch. CI runs lint, typecheck, units, and the eval on every push.
+- **Tests + retrieval eval** — `npm test` runs unit tests (chunking, embedding determinism/normalization, registry search ranking, catalog composition, schema-validated dispatch, dashboard search query parsing) plus a golden-set retrieval eval that runs the real chunk→embed→rank pipeline in memory and fails the build if recall@1 or recall@3 regress — currently 78% / 100% on the zero-key lexical baseline. `npm run smoke` exercises the whole story against a running server: sign-up → API key → ingest → MCP initialize → auth rejection → `rag_search` relevance → fleet discovery → dispatch. CI runs lint, typecheck, units, and the eval on every push.
 
 ## Quickstart
 
@@ -108,6 +108,10 @@ Then try:
 - Reranking stage, and a larger eval corpus scored against real embeddings
 - Embedding-based tool discovery for 1,000+ tool registries
 - File upload (PDF/DOCX extraction) alongside paste-to-ingest
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

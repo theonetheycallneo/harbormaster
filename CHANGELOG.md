@@ -24,8 +24,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - js-yaml 4.3.0 → 4.3.1
 - fast-uri 3.1.3 → 3.1.5
 - ip-address 10.2.0 → 10.4.0
-- postcss 8.5.16 → 8.5.26 (override; Next stays on 16.2.10)
-
-### Changed
-
-- Left the Next 16.3 bump on the table. Bigger blast radius than the postcss pin; CI stays on the last known-good Next line.
+- postcss 8.5.16 → 8.5.26
+- next / eslint-config-next 16.2.10 → 16.3.2 (reviewed; lint, typecheck, and tests stayed green)

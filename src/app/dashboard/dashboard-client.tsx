@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { snippet } from "@/lib/rag/dashboard-search";
 
 interface Doc {
   id: string;
@@ -18,6 +19,14 @@ interface KeyInfo {
   name: string | null;
   start: string | null;
   createdAt: string;
+}
+
+interface SearchHit {
+  documentId: string;
+  documentTitle: string;
+  chunkIdx: number;
+  content: string;
+  score: number;
 }
 
 export function DashboardClient(props: {
@@ -37,6 +46,10 @@ export function DashboardClient(props: {
   const [keyName, setKeyName] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [searchHits, setSearchHits] = useState<SearchHit[] | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const loadDocs = useCallback(async () => {
     const res = await fetch("/api/documents");
@@ -78,6 +91,28 @@ export function DashboardClient(props: {
   async function removeDoc(id: string) {
     await fetch(`/api/documents?id=${id}`, { method: "DELETE" });
     await loadDocs();
+  }
+
+  async function searchDocs(e: React.FormEvent) {
+    e.preventDefault();
+    setSearching(true);
+    setSearchError(null);
+    try {
+      const params = new URLSearchParams({ q: searchQuery });
+      const res = await fetch(`/api/search?${params.toString()}`);
+      const data = await res.json();
+      if (!res.ok) {
+        setSearchHits(null);
+        setSearchError(data.error ?? "Search failed");
+      } else {
+        setSearchHits(data.hits as SearchHit[]);
+      }
+    } catch (err) {
+      setSearchHits(null);
+      setSearchError(err instanceof Error ? err.message : "Search failed");
+    } finally {
+      setSearching(false);
+    }
   }
 
   async function createKey(e: React.FormEvent) {
@@ -134,6 +169,59 @@ export function DashboardClient(props: {
           {message}
         </p>
       )}
+
+      <section className="mb-8 rounded-xl border border-zinc-800 p-5">
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+          Search your documents
+        </h2>
+        <p className="mb-3 text-xs text-zinc-500">
+          Same per-user <code>rag_search</code> pipeline Claude uses — no MCP
+          client required to see if ingest worked.
+        </p>
+        <form onSubmit={searchDocs} className="flex gap-2">
+          <input
+            className="min-w-0 flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-amber-500"
+            placeholder="e.g. rollback procedure"
+            required
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button
+            disabled={searching}
+            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-amber-400 disabled:opacity-50"
+          >
+            {searching ? "Searching…" : "Search"}
+          </button>
+        </form>
+        {searchError && (
+          <p className="mt-3 text-sm text-amber-400">{searchError}</p>
+        )}
+        {searchHits && searchHits.length === 0 && (
+          <p className="mt-3 text-sm text-zinc-600">
+            No chunks matched. Ingest a document first, or try different words.
+          </p>
+        )}
+        {searchHits && searchHits.length > 0 && (
+          <ul className="mt-4 flex flex-col gap-2">
+            {searchHits.map((hit) => (
+              <li
+                key={`${hit.documentId}-${hit.chunkIdx}`}
+                className="rounded-lg bg-zinc-900 px-3 py-2"
+              >
+                <div className="mb-1 flex items-baseline justify-between gap-3">
+                  <p className="truncate text-sm">{hit.documentTitle}</p>
+                  <span className="shrink-0 font-mono text-xs text-zinc-500">
+                    {(hit.score * 100).toFixed(0)}% · chunk {hit.chunkIdx + 1}
+                  </span>
+                </div>
+                <p className="text-xs leading-relaxed text-zinc-400">
+                  {snippet(hit.content)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <div className="grid gap-8 md:grid-cols-2">
         {/* Ingest */}

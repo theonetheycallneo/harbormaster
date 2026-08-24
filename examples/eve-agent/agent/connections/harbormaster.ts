@@ -9,7 +9,7 @@ import { defineMcpClientConnection } from "eve/connections";
  * the key never enters model context.
  */
 export default defineMcpClientConnection({
-  url: process.env.HARBORMASTER_URL ?? "http://localhost:3000/api/mcp/mcp",
+  url: process.env.HARBORMASTER_URL ?? "http://localhost:3000/api/mcp",
   description:
     "Harbormaster: per-user document RAG plus a 116-tool fleet reached via search_tools/describe_tool/invoke_tool.",
   auth: {

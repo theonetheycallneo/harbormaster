@@ -13,8 +13,9 @@ const handler = createMcpHandler(
     },
   },
   {
-    // Backward-compatible alias: /api/mcp/mcp still matches this transport route.
-    basePath: "/api/mcp",
+    // mcp-handler 1.x matches url.pathname === `${basePath}/mcp`.
+    // This route is /api/mcp, so basePath must be /api (not /api/mcp).
+    basePath: "/api",
     maxDuration: 60,
     disableSse: true,
   },

@@ -142,8 +142,8 @@ export function DashboardClient(props: {
 
   const mcpUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/api/mcp/mcp`
-      : "http://localhost:3000/api/mcp/mcp";
+      ? `${window.location.origin}/api/mcp`
+      : "http://localhost:3000/api/mcp";
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">

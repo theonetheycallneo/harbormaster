@@ -25,7 +25,7 @@ async function mcpCall(
   apiKey: string,
   body: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
-  const res = await fetch(`${BASE}/api/mcp/mcp`, {
+  const res = await fetch(`${BASE}/api/mcp`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -75,7 +75,7 @@ async function main() {
 
   // 3. Unauthenticated MCP is rejected
   console.log("\n2. MCP auth boundary");
-  const noAuth = await fetch(`${BASE}/api/mcp/mcp`, {
+  const noAuth = await fetch(`${BASE}/api/mcp`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream" },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
@@ -111,6 +111,26 @@ async function main() {
   });
   const serverName = (init.result as { serverInfo?: { name?: string } })?.serverInfo?.name;
   ok("MCP initialize", serverName === "harbormaster", init);
+
+  const alias = await fetch(`${BASE}/api/mcp/mcp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: "alias",
+      method: "initialize",
+      params: {
+        protocolVersion: "2025-03-26",
+        capabilities: {},
+        clientInfo: { name: "smoke", version: "0.0.1" },
+      },
+    }),
+  });
+  ok("legacy /api/mcp/mcp alias still serves MCP", alias.ok, alias.status);
 
   const toolsList = await mcpCall(apiKey, { method: "tools/list", params: {} });
   const tools = ((toolsList.result as { tools?: { name: string }[] })?.tools ?? []).map(

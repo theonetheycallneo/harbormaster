@@ -70,7 +70,7 @@ npm run smoke
 
 ```bash
 claude mcp add --transport http harbormaster \
-  http://localhost:3000/api/mcp/mcp \
+  http://localhost:3000/api/mcp \
   --header "Authorization: Bearer hm_YOUR_KEY"
 ```
 

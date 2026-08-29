@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { snippet } from "@/lib/rag/dashboard-search";
+import { DiscoveryPanel } from "./discovery-panel";
 
 interface Doc {
   id: string;
@@ -169,6 +170,8 @@ export function DashboardClient(props: {
           {message}
         </p>
       )}
+
+      <DiscoveryPanel />
 
       <section className="mb-8 rounded-xl border border-zinc-800 p-5">
         <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-zinc-400">
@@ -351,7 +354,8 @@ export function DashboardClient(props: {
             <code>rag_search</code>) or <em>“find a tool that can issue a
             refund”</em> — it will discover{" "}
             <code>billing.issue_refund</code> via <code>search_tools</code> and
-            execute it through <code>invoke_tool</code>.
+            execute it through <code>invoke_tool</code>. The Discovery panel
+            above is that same loop, run from this session.
           </p>
         </section>
       </div>

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Dashboard Discovery.** Type a natural-language ask on the signed-in dashboard and watch the live `search_tools` → `describe_tool` → `invoke_tool` loop against the registry. Session auth is enough; no API key required to demo the constant-context path.
 - **Dashboard search.** Ingest a document, then search it from the same page. Same per-user `rag_search` pipeline Claude uses — no MCP client required to see if ingest worked.
 - This changelog, so weekend drips have a source of truth.
 

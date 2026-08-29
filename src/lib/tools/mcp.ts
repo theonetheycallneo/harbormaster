@@ -3,6 +3,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { getRegistry } from "./index";
 import type { ToolContext } from "./registry";
+import { describeTool, invokeTool, searchTools } from "./discovery";
 
 /**
  * The MCP surface: a constant-size set of entry points over an arbitrarily
@@ -73,19 +74,18 @@ export function registerMcpSurface(server: McpServer) {
       limit: z.number().int().min(1).max(25).optional().describe("Max results (default 10)"),
     },
     async (args) => {
-      const results = registry
-        .search(String(args.query), args.limit ? Number(args.limit) : 10)
-        .map((t) => ({
+      const found = searchTools(
+        registry,
+        String(args.query),
+        args.limit ? Number(args.limit) : 10,
+      );
+      return asText({
+        ...found,
+        results: found.results.map((t) => ({
           name: t.name,
           description: t.description,
           simulated: t.simulated,
-        }));
-      return asText({
-        total_registry_size: registry.count(),
-        namespaces: registry.namespaces(),
-        results,
-        next_step:
-          "Call describe_tool for the argument schema, then invoke_tool to execute.",
+        })),
       });
     },
   );
@@ -97,28 +97,9 @@ export function registerMcpSurface(server: McpServer) {
       name: z.string().min(1).describe("Fully-qualified tool name, e.g. 'billing.issue_refund'"),
     },
     async (args) => {
-      const tool = registry.get(String(args.name));
-      if (!tool) {
-        return asError(
-          `Unknown tool '${args.name}'. Use search_tools to discover valid names.`,
-        );
-      }
-      const argSpec = Object.fromEntries(
-        Object.entries(tool.schema).map(([key, schema]) => [
-          key,
-          {
-            description: schema.description ?? null,
-            optional: schema.isOptional(),
-          },
-        ]),
-      );
-      return asText({
-        name: tool.name,
-        namespace: tool.namespace,
-        description: tool.description,
-        simulated: tool.simulated,
-        arguments: argSpec,
-      });
+      const described = describeTool(registry, String(args.name));
+      if (!described.ok) return asError(described.error);
+      return asText(described.data);
     },
   );
 
@@ -133,23 +114,16 @@ export function registerMcpSurface(server: McpServer) {
         .describe("Arguments object matching the tool's schema (see describe_tool)"),
     },
     async (input, extra) => {
-      const tool = registry.get(String(input.name));
-      if (!tool) {
-        return asError(
-          `Unknown tool '${input.name}'. Use search_tools to discover valid names.`,
-        );
-      }
       try {
-        const parsed = z.object(tool.schema).safeParse(input.args ?? {});
-        if (!parsed.success) {
-          return asError(
-            `Invalid arguments for ${tool.name}: ${parsed.error.issues
-              .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
-              .join("; ")}`,
-          );
-        }
         const ctx: ToolContext = { userId: userIdFrom(extra.authInfo) };
-        return asText(await tool.handler(parsed.data, ctx));
+        const invoked = await invokeTool(
+          registry,
+          String(input.name),
+          (input.args as Record<string, unknown> | undefined) ?? {},
+          ctx,
+        );
+        if (!invoked.ok) return asError(invoked.error);
+        return asText(invoked.data);
       } catch (err) {
         return asError(err);
       }

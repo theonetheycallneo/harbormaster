@@ -19,7 +19,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^4.0.11",
     "@better-auth/api-key": "^1.6.23",
-    "ai": "^7.0.22",
+    "ai": "^7.0.156",
     "better-auth": "^1.6.23",
     "drizzle-orm": "^0.45.2",
     "mcp-handler": "^1.1.0",

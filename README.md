@@ -44,25 +44,25 @@ The fleet tools (crm, billing, calendar, github, slack, analytics, inventory, su
 - **RAG** — paragraph-aware chunking (~1200 chars, 150 overlap) → embeddings → pgvector with HNSW cosine index. Search, list, fetch, and ingest are all exposed over both REST (dashboard) and MCP (agents). The dashboard search box runs the same per-user pipeline as `rag_search`, so you can see whether ingest worked before wiring a client.
 - **Dashboard Discovery** — the signed-in dashboard runs the same `search_tools` → `describe_tool` → `invoke_tool` loop against the live registry. The session is the identity, so you can watch a fleet hit without minting an API key.
 - **Zero-key demo mode** — without `OPENAI_API_KEY`, embeddings fall back to a deterministic hashed bag-of-words baseline (FNV-1a token hashing into 1536 dims, tf-weighted, L2-normalized). That's real lexical retrieval, not random vectors — the entire stack runs end-to-end with no external API keys. Set one env var to switch to `text-embedding-3-small`.
-- **Tests + retrieval eval** — `npm test` runs unit tests (chunking, embedding determinism/normalization, registry search ranking, catalog composition, schema-validated dispatch, dashboard search query parsing) plus a golden-set retrieval eval that runs the real chunk→embed→rank pipeline in memory and fails the build if recall@1 or recall@3 regress — currently 78% / 100% on the zero-key lexical baseline. `npm run smoke` exercises the whole story against a running server: sign-up → API key → ingest → MCP initialize → auth rejection → `rag_search` relevance → fleet discovery → dispatch. CI runs lint, typecheck, units, and the eval on every push. Installs use `legacy-peer-deps` (see `.npmrc`) so a Dependabot lockfile that omits vite's optional esbuild peer still clean-installs.
+- **Tests + retrieval eval** — `bun run test` runs unit tests (chunking, embedding determinism/normalization, registry search ranking, catalog composition, schema-validated dispatch, dashboard search query parsing) plus a golden-set retrieval eval that runs the real chunk→embed→rank pipeline in memory and fails the build if recall@1 or recall@3 regress — currently 78% / 100% on the zero-key lexical baseline. `bun run smoke` exercises the whole story against a running server: sign-up → API key → ingest → MCP initialize → auth rejection → `rag_search` relevance → fleet discovery → dispatch. CI installs with bun, then runs lint, `tsrs --noEmit --fast`, units, and the eval on every push. The `typescript` package stays installed because `next build` resolves that package's CLI; the typecheck script does not call it.
 
 ## Quickstart
 
 ```bash
 git clone https://github.com/theonetheycallneo/harbormaster
 cd harbormaster
-npm install
+bun install
 cp .env.example .env          # then set BETTER_AUTH_SECRET (openssl rand -base64 32)
 
 docker compose up -d           # Postgres 17 + pgvector on :5442
-npm run db:push                # create tables
-npm run dev                    # http://localhost:3000
+bun run db:push                # create tables
+bun run dev                    # http://localhost:3000
 ```
 
 Sign up, ingest a document, create an API key — then verify everything:
 
 ```bash
-npm run smoke
+bun run smoke
 ```
 
 ## Connect a client

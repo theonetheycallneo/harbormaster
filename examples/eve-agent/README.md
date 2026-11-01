@@ -16,7 +16,7 @@ parts are three small files:
 Requires Node.js >= 24.
 
 ```bash
-# 1. Have Harbormaster running (repo root): docker compose up -d && npm run dev
+# 1. Have Harbormaster running (repo root): docker compose up -d && bun run dev
 # 2. Mint an API key in the Harbormaster dashboard
 cp .env.example .env      # set HARBORMASTER_API_KEY + a model provider key
 npm install

@@ -9,7 +9,7 @@ import { embedTexts, embedQuery } from "@/lib/rag/embed";
  * This is the gate the README promises: change chunking, embeddings, or
  * ranking and recall@k regressions fail the build. The corpus is small and
  * lexical by design — it must pass in zero-key hashed-BoW mode; with
- * OPENAI_API_KEY set, `npm run eval` exercises real embeddings instead.
+ * OPENAI_API_KEY set, `bun run eval` exercises real embeddings instead.
  */
 
 const CORPUS: { id: string; title: string; content: string }[] = [

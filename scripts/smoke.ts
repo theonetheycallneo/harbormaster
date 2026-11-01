@@ -3,7 +3,7 @@
  *   sign-up → API key → ingest via REST → MCP initialize → tools/list →
  *   rag_search → search_tools → invoke_tool (fleet).
  *
- * Run: npm run smoke   (expects `npm run dev` on :3000 and the db up)
+ * Run: bun run smoke   (expects `bun run dev` on :3000 and the db up)
  */
 
 const BASE = process.env.SMOKE_BASE_URL ?? "http://localhost:3000";

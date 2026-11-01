@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Dependabot `npm ci`.** Refreshed lockfiles drop vite's esbuild peer (the copy nested under vitest). `npm ci` then fails with `Missing: esbuild@0.28.2` and every `@esbuild/*` platform package, before lint or tests. `.npmrc` sets `legacy-peer-deps=true`, which is how main already resolves. Open dependency PRs can go green on the next CI run after this merges.
 - **`npm ci` on GitHub Actions.** The lockfile now includes optional `@esbuild/*` platform packages (including `@esbuild/linux-x64`). Dependabot PRs were red for the missing optional, not for the bumps themselves.
 
 ### Security

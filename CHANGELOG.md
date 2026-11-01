@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dashboard search.** Ingest a document, then search it from the same page. Same per-user `rag_search` pipeline Claude uses — no MCP client required to see if ingest worked.
 - This changelog, so weekend drips have a source of truth.
 
+### Changed
+
+- **bun + tsrs.** Install, scripts, and CI use bun 1.4.4 (`bun install --frozen-lockfile`). Typecheck is `tsrs --noEmit --fast` (Rust TypeScript 7, fast preset) instead of `tsc`. `typescript` stays installed because `next build` still resolves that package's CLI. The Eve example remains its own npm app.
+
 ### Fixed
 
 - **`npm ci` on GitHub Actions.** The lockfile now includes optional `@esbuild/*` platform packages (including `@esbuild/linux-x64`). Dependabot PRs were red for the missing optional, not for the bumps themselves.
